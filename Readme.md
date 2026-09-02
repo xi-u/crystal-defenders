@@ -38,9 +38,3 @@ Want a longer or meaner fight? The knobs are serialized fields, tunable in the I
 | `Assets/Audio/` | The `AudioPlayer` and all clips. |
 | `Assets/Camera/` | The screen shake component. |
 | `Docs/` | The assignments. |
-
-## Before you start the assignments
-
-One warning: **there is no protected folder in this project.** Every script is open and editable, which means it is also open to being broken. Each assignment starts with a "Your work area" section that names the exact files it touches. Trust that list. Treat everything outside it as read-only until a document says otherwise.
-
-Start with `Docs/01-state-pattern.md` and go in order. `Docs/series-outcomes.md` tells you what you will be able to do by the end, what the series assumes you already know, and what to read if you want to go deeper.
