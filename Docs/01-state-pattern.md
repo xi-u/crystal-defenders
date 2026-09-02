@@ -4,7 +4,7 @@
 
 TODO Add git repo here.
 
-You have inherited a top-down tower defense simulation. Spawn zones send enemies marching toward a crystal, and autonomous turrets are supposed to defend it. There is no player. The whole thing runs itself.
+You have inherited *Crystal Defenders*, a top-down defence simulation. Spawn zones send enemies marching toward a crystal, and autonomous turrets are supposed to defend it. There is no player. The whole thing runs itself.
 
 There is one problem: the last developer did not finish the job.
 
