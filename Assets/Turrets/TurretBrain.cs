@@ -15,10 +15,32 @@ public class TurretBrain : TurretBody
 
     Enemy target;
     float nextFireTime;
+    float reloadTimer;
 
 
     void Update()
     {
+        if (reloadTimer > 0f)
+        {
+            reloadTimer -= Time.deltaTime;
+            SetFiringIndicator(false);
+
+            if (reloadTimer <= 0f)
+            {
+                RefillClip();
+                reloadTimer = 0f;
+            }
+
+            return;
+        }
+
+        if (ClipEmpty)
+        {
+            reloadTimer = reloadTime;
+            SetFiringIndicator(false);
+            return;
+        }
+
         target = FindNearestEnemy();
 
         if (target == null)
@@ -40,7 +62,11 @@ public class TurretBrain : TurretBody
         {
             FireOnce(target.transform);
             nextFireTime = Time.time + fireInterval;
+
+            if (ClipEmpty)
+            {
+                reloadTimer = reloadTime;
+            }
         }
     }
-
 }
