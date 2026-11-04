@@ -13,60 +13,22 @@ public class TurretBrain : TurretBody
     [Tooltip("Seconds between shots. The turret does NOT enforce this. Read it and pace your own shots.")]
     [SerializeField] float fireInterval = 0.4f;
 
-    Enemy target;
-    float nextFireTime;
-    float reloadTimer;
+    private TurretState _current;
 
-
-    void Update()
+    private void OnEnable()
     {
-        if (reloadTimer > 0f)
-        {
-            reloadTimer -= Time.deltaTime;
-            SetFiringIndicator(false);
-
-            if (reloadTimer <= 0f)
-            {
-                RefillClip();
-                reloadTimer = 0f;
-            }
-
-            return;
-        }
-
-        if (ClipEmpty)
-        {
-            reloadTimer = reloadTime;
-            SetFiringIndicator(false);
-            return;
-        }
-
-        target = FindNearestEnemy();
-
-        if (target == null)
-        {
-            SetFiringIndicator(false);
-            return;
-        }
-
-        bool aimed = RotateTowards(target.transform, Time.deltaTime);
-        if (!aimed)
-        {
-            SetFiringIndicator(false);
-            return;
-        }
-
-        SetFiringIndicator(true);
-        // FireOnce has no cooldown of its own. Pacing is the caller's job.
-        if (Time.time >= nextFireTime)
-        {
-            FireOnce(target.transform);
-            nextFireTime = Time.time + fireInterval;
-
-            if (ClipEmpty)
-            {
-                reloadTimer = reloadTime;
-            }
-        }
+        ChangeState(new TurretIdleState(this));
     }
+
+    public void ChangeState(TurretState next)
+    {
+        _current?.Exit();
+        _current = next;
+        _current.Enter();
+    }
+    
+    void Update() => _current.Tick();
+
+    public float ReloadTime => reloadTime;
+    public float FireInterval => fireInterval;
 }

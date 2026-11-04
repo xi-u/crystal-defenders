@@ -12,7 +12,7 @@ Answer every question in your own words about your own code. Short answers are f
 
 ## Part 1 — Setting the stage
 
-1. How many separate fields do you need to keep in sync by hand to answer "what is this turret doing right now?"
+**1. How many separate fields do you need to keep in sync by hand to answer "what is this turret doing right now?"**
 
 Around 4 pieces of state to keep in sync:
 - Current target
@@ -20,7 +20,7 @@ Around 4 pieces of state to keep in sync:
 - Reload timer
 - Next fire time 
 
-2. Does the order of your `if` branches matter? What happens if you reorder them, and does anything in the code explain why that order is required?
+**2. Does the order of your `if` branches matter? What happens if you reorder them, and does anything in the code explain why that order is required?**
 
 Yes the order matters a lot. The code checks the following:
 - reloading first
@@ -32,7 +32,7 @@ Yes the order matters a lot. The code checks the following:
 The reason is that each branch ends with a return statment, which basically means that "this state takes priority and 
 everything else is ignored". If the order is changes the turret will behave not as expected.
 
-3. If you had to add a fourth behavior (say a cooldown before the first shot), how many existing branches would you have to revisit to make sure it cannot be entered at the wrong moment?
+**3. If you had to add a fourth behavior (say a cooldown before the first shot), how many existing branches would you have to revisit to make sure it cannot be entered at the wrong moment?**
 
 You would have to revisit all the existing branches. You would have to check if the turret is in cooldown state before 
 checking for reloading, clip empty, missing target, not aimed target, and timing for firing.
@@ -41,14 +41,24 @@ checking for reloading, clip empty, missing target, not aimed target, and timing
 
 ## Part 2 — The State pattern
 
-1. Where does the locked-target behavior live now, and how many of the other states had to know about it?
+**1. Where does the locked-target behavior live now, and how many of the other states had to know about it?**
 
-2. Answer the three Part 1 questions again for the state-machine version:
-   - Fields to keep in sync:
-   - Does branch order still matter:
-   - Cost of a fourth behavior:
+It now lives in the TurretAimingState and TurretFiringState. They each have a reference to the target.
+The other states (TurretIdleState and TurretReloadingState) do not need to know about the target.
 
-3. Name one thing in this project where a state machine would be over-engineering, and the simpler solution:
+**2. Answer the three Part 1 questions again for the state-machine version:**
+   - **Fields to keep in sync**: Only the currenst state pointer is shared by the turret brain. The important
+   data is owned by the active state, so there is no need to keep multiple fields in sync.
+   - **Does branch order still matter**: Yes, but only inside a single state. Each state has its own priority order of checks
+   so the risk is much more localized instead of being spread across the entire turret brian.
+   - **Cost of a fourth behavior**: Much lower, because you can add a new state without having to touch the existing states. 
+   You add one new state class and a few transitions to the existing states, instead of having to touch all the existing 
+   branches in a single method.
+
+**3. Name one thing in this project where a state machine would be over-engineering, and the simpler solution:**
+
+Maybe the turret firing indicator. A simple boolean flag or direct method call would be sufficient enough. 
+A state machine would be too overkill for this.
 
 ---
 
