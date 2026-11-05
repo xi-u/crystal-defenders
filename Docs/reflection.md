@@ -101,40 +101,54 @@ trade-off?**
 
 Fill in the Part 4 column after Part 4, the Part 5 column after Part 5 Task 2.
 
-| Question                                                         | Part 4 (polling)                                                                                                                          | Part 5 (events) |
-|------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|-----------------|
-| Scripts holding a reference to the crystal                       | HUD, WaveDirector, TurretBrain                                                                                                            |                 |
-| Fields storing a copy of the crystal's past state                | HUD.previousHealth, WaveDirector.previousCrystalHealth                                                                                    |                 |
-| Files containing the low-health threshold (0.25 / 25%)           | HUD, WaveDirector, TurretBrain                                                                                                            |                 |
-| What breaks, and where, if the crystal is missing from the scene | WaveDirectro.Update() ends immediately with EndGame()                                                                                     |                 |
-| Questions asked of the crystal in one single frame               | WaveDirector ask IsDestroyed, CurrentHeatlh, MaxHealth. HUD ask CurrentHealth, MaxHealth. TurretBrain also ask CurrentHealh and MaxHealth |                 |
+| Question                                                         | Part 4 (polling)                                                                                                                          | Part 5 (events)                                                                                                                        |
+|------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| Scripts holding a reference to the crystal                       | HUD, WaveDirector, TurretBrain                                                                                                            | HUD, WaveDirector, TurretBrain                                                                                                         |
+| Fields storing a copy of the crystal's past state                | HUD.previousHealth, WaveDirector.previousCrystalHealth                                                                                    | 0                                                                                                                                      |
+| Files containing the low-health threshold (0.25 / 25%)           | HUD, WaveDirector, TurretBrain                                                                                                            | Crystal.cs                                                                                                                             |
+| What breaks, and where, if the crystal is missing from the scene | WaveDirectro.Update() ends immediately with EndGame()                                                                                     | Events won't work, so HUD updates/low health music, turret low health boost are not there. The WaveDirector also doesnt call EndGame() |
+| Questions asked of the crystal in one single frame               | WaveDirector ask IsDestroyed, CurrentHeatlh, MaxHealth. HUD ask CurrentHealth, MaxHealth. TurretBrain also ask CurrentHealh and MaxHealth | None, the crystal is invoking events                                                                                                   |
 
 **Part 4 only: where are you calling `Shake()` from, and why there?**
 
-Shake() is called from the WaveDirector, right where a hit is detected. Its there because the WaveDirector is already
+Shake () is called from the WaveDirector, right where a hit is detected. Its there because the WaveDirector is already
 polling the crystal health every frame, so it is a good place to detect exactly one hit and trigger the one shake.
 
 ---
 
 ## Part 5 — The Observer pattern
 
-1. Which of the two refactors (Part 2 state machine, Part 5 events) deleted more code than it added? Use your actual
-   diffs.
+**1. Which of the two refactors (Part 2 state machine, Part 5 events) deleted more code than it added? Use your actual
+diffs.**
 
-2. Where in this project would an event be over-engineering? Name a concrete pair of objects and say why a simpler
-   mechanism is enough.
+Part 5 events deleted more code than added. In part 5, I removed multiple polling checks and duplicated threshold logic.
+In part 2, I added a lot of new state classes and transitions, which added more code than it removed.
 
-3. What do the audit numbers say now? Which did the Observer pattern fix, which did Task 2 fix, and which would still be
-   there at ten times the scale?
+**2. Where in this project would an event be over-engineering? Name a concrete pair of objects and say why a simpler
+mechanism is enough.**
+
+Example would be the TurretBrain and TurretBody. The TurretBrain can directly call a method on the TurretBody to update
+its firing indicator. An event would be overkill because the relation is direct.
+
+**3. What do the audit numbers say now? Which did the Observer pattern fix, which did Task 2 fix, and which would still
+be there at ten times the scale?**
+
+Observer pattern fixed the number of fields storing a copy of the crystals past state, and the number of questions asked
+of the crystal, and polling checks.
+
+Task 2 fixed the duplicated threshold logic.
+
+References to the crystal would still be there at ten times the scale, because the HUD, WaveDirector, and TurretBrain
+all need to know about the crystal.
 
 ### Scenario picks
 
 Pick one mechanism per scenario: direct call, polling, injection, singleton, instance event, static event. Defend it in
 one sentence.
 
-| Scenario                                       | Mechanism | Why (one sentence) |
-|------------------------------------------------|-----------|--------------------|
-| An ammo readout drawn next to each turret      |           |                    |
-| An achievement that fires at 10 total kills    |           |                    |
-| A pause menu that reads the current time scale |           |                    |
-| A sound on every enemy death                   |           |                    |
+| Scenario                                       | Mechanism      | Why (one sentence)                                                                  |
+|------------------------------------------------|----------------|-------------------------------------------------------------------------------------|
+| An ammo readout drawn next to each turret      | Direct call    | The TurretBrian can directly update the TurretBodys ammo without needing an event.  |
+| An achievement that fires at 10 total kills    | Static event   | Achievements are global and can be listened to by any without direct references.    |
+| A pause menu that reads the current time scale | Singleton      | The time scale is a global state that the pause menu can access though a singleton. |
+| A sound on every enemy death                   | Instance event | Each enemy can trigger its own death event, allowing multiple listeners to respond. |

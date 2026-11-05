@@ -25,12 +25,28 @@ public class HUD : MonoBehaviour
 
     Color baseColor;
     Coroutine flashRoutine;
-    int previousHealth = -1;
-
     void Awake()
     {
         baseColor = healthyColor;
         crystalHealthFill.color = baseColor;
+    }
+
+    void OnEnable()
+    {
+        if (crystal != null)
+        {
+            crystal.OnHealthChanged += OnCrystalHealthChanged;
+            crystal.OnLowHealth += OnCrystalLowHealth;
+        }
+    }
+
+    void OnDisable()
+    {
+        if (crystal != null)
+        {
+            crystal.OnHealthChanged -= OnCrystalHealthChanged;
+            crystal.OnLowHealth -= OnCrystalLowHealth;
+        }
     }
 
     void Update()
@@ -40,17 +56,19 @@ public class HUD : MonoBehaviour
         SetVisible(shouldShow);
         if (!shouldShow) return;
 
-        if (crystal == null || crystal.MaxHealth <= 0) return;
+    }
 
-        ShowCrystalHealth((float)crystal.CurrentHealth / crystal.MaxHealth);
+    void OnCrystalHealthChanged(int currentHealth, int maxHealth)
+    {
+        if (maxHealth <= 0) return;
 
-        bool lowHealth = crystal.CurrentHealth * 4 < crystal.MaxHealth;
-        SetLowHealth(lowHealth);
+        ShowCrystalHealth((float)currentHealth / maxHealth);
+        FlashBar();
+    }
 
-        if (previousHealth >= 0 && crystal.CurrentHealth < previousHealth)
-            FlashBar();
-
-        previousHealth = crystal.CurrentHealth;
+    void OnCrystalLowHealth()
+    {
+        SetLowHealth(true);
     }
 
     void SetVisible(bool visible)

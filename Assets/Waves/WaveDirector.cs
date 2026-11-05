@@ -11,24 +11,24 @@ using UnityEngine;
 /// </summary>
 public class WaveDirector : MonoBehaviour
 {
-    [Header("Scene references")]
-    [SerializeField] Crystal crystal;
+    [Header("Scene references")] [SerializeField]
+    Crystal crystal;
+
     [SerializeField] SpawnZone[] spawnZones;
 
-    [Header("Spawning")]
-    [Tooltip("Seconds before the first enemy appears after pressing Play.")]
-    [SerializeField] float firstSpawnDelay = 1f;
-    [Tooltip("Seconds between spawns.")]
-    [SerializeField] float spawnInterval = 2f;
-    [Tooltip("Total enemies to spawn this run. 0 means keep spawning forever.")]
-    [SerializeField] int totalEnemies = 0;
+    [Header("Spawning")] [Tooltip("Seconds before the first enemy appears after pressing Play.")] [SerializeField]
+    float firstSpawnDelay = 1f;
+
+    [Tooltip("Seconds between spawns.")] [SerializeField]
+    float spawnInterval = 2f;
+
+    [Tooltip("Total enemies to spawn this run. 0 means keep spawning forever.")] [SerializeField]
+    int totalEnemies = 0;
 
     float nextSpawnTime;
     int spawnedCount;
     bool running;
     bool gameOver;
-    int previousCrystalHealth = -1;
-    bool lowHealthMusicStarted;
 
     /// <summary>True once the crystal has fallen. The UI polls this.</summary>
     public bool IsGameOver => gameOver;
@@ -36,6 +36,26 @@ public class WaveDirector : MonoBehaviour
     /// <summary>True once the run has been started. The HUD polls this to know
     /// whether it should be on screen at all.</summary>
     public bool IsRunning => running;
+
+    private void OnEnable()
+    {
+        if (crystal != null)
+        {
+            crystal.OnHealthChanged += OnCrystalHealthChanged;
+            crystal.OnLowHealth += OnCrystalLowHealth;
+            crystal.OnDestroyed += EndGame;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (crystal != null)
+        {
+            crystal.OnHealthChanged -= OnCrystalHealthChanged;
+            crystal.OnLowHealth -= OnCrystalLowHealth;
+            crystal.OnDestroyed -= EndGame;
+        }
+    }
 
     /// <summary>
     /// Called by the start button. Nothing spawns until this runs, which is
@@ -46,11 +66,9 @@ public class WaveDirector : MonoBehaviour
     {
         if (running || gameOver) return;
         running = true;
-        
+
         AudioPlayer.Instance?.PlayBGM();
-        previousCrystalHealth = crystal != null ? crystal.CurrentHealth : -1;
-        lowHealthMusicStarted = false;
-        
+
         nextSpawnTime = Time.time + firstSpawnDelay;
 
         // Enemy.TotalKilled is static, so it lives in the C# domain and not in
@@ -63,28 +81,6 @@ public class WaveDirector : MonoBehaviour
     void Update()
     {
         if (!running || gameOver) return;
-
-        // The director ASKS the crystal every frame whether it is still alive.
-        // That polling is the pain assignment 3 removes by having the crystal
-        // announce its own destruction instead.
-        if (crystal == null || crystal.IsDestroyed)
-        {
-            EndGame();
-            return;
-        }
-
-        bool tookDamageThisFrame = previousCrystalHealth >= 0 && crystal.CurrentHealth < previousCrystalHealth;
-        if (tookDamageThisFrame)
-            ScreenShake.Instance?.Shake();
-
-        bool lowHealth = crystal.CurrentHealth * 4 < crystal.MaxHealth;
-        if (lowHealth && !lowHealthMusicStarted)
-        {
-            AudioPlayer.Instance?.PlayBGMLowHealth();
-            lowHealthMusicStarted = true;
-        }
-
-        previousCrystalHealth = crystal.CurrentHealth;
 
         if (Time.time < nextSpawnTime) return;
         nextSpawnTime = Time.time + spawnInterval;
@@ -99,6 +95,20 @@ public class WaveDirector : MonoBehaviour
             zone.Spawn(crystal);
             spawnedCount++;
         }
+    }
+
+    void OnCrystalHealthChanged(int currentHealth, int maxHealth)
+    {
+        if (!running || gameOver || maxHealth <= 0) return;
+
+        ScreenShake.Instance?.Shake();
+
+    }
+
+    void OnCrystalLowHealth()
+    {
+        if (!running || gameOver) return;
+        AudioPlayer.Instance?.PlayBGMLowHealth();
     }
 
     void EndGame()

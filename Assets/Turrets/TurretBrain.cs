@@ -15,12 +15,21 @@ public class TurretBrain : TurretBody
     [Header("Firing")]
     [Tooltip("Seconds between shots. The turret does NOT enforce this. Read it and pace your own shots.")]
     [SerializeField] float fireInterval = 0.4f;
+    bool isCrystalLowHealth;
 
     private TurretState _current;
 
     private void OnEnable()
     {
+        if (crystal != null)
+            crystal.OnLowHealth += OnCrystalLowHealth;
         ChangeState(new TurretIdleState(this));
+    }
+    
+    private void OnDisable()
+    {
+        if (crystal != null)
+            crystal.OnLowHealth -= OnCrystalLowHealth;
     }
 
     public void ChangeState(TurretState next)
@@ -34,5 +43,10 @@ public class TurretBrain : TurretBody
 
     public float ReloadTime => reloadTime;
     public float FireInterval => fireInterval;
-    public bool IsCrystalLowHealth => crystal != null && crystal.MaxHealth > 0 && crystal.CurrentHealth * 4 < crystal.MaxHealth;
+    public bool IsCrystalLowHealth => isCrystalLowHealth;
+
+    void OnCrystalLowHealth()
+    {
+        isCrystalLowHealth = true;
+    }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -17,6 +18,7 @@ using UnityEngine;
 public class Crystal : MonoBehaviour
 {
     [SerializeField] int maxHealth = 10;
+    [SerializeField, Range(0f, 1f)] float lowHealthThreshold = 0.25f;
 
     [Header("Hit feedback")]
     [SerializeField] Color flashColor = Color.red;
@@ -37,6 +39,11 @@ public class Crystal : MonoBehaviour
     public int CurrentHealth => currentHealth;
     public int MaxHealth => maxHealth;
     public bool IsDestroyed => currentHealth <= 0;
+    
+    public event Action<int, int> OnHealthChanged;
+    public event Action OnLowHealth;
+    public event Action OnDestroyed;
+    bool lowHealthAnnounced;
 
     void Awake()
     {
@@ -48,6 +55,7 @@ public class Crystal : MonoBehaviour
         // modified, and the tint cannot leak out of play mode into the project.
         propertyBlock = new MaterialPropertyBlock();
         normalColor = visual.sharedMaterial.GetColor(BaseColorId);
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
     public void TakeDamage(int amount)
@@ -55,6 +63,8 @@ public class Crystal : MonoBehaviour
         if (IsDestroyed) return;            // already dead: ignore late hits
 
         currentHealth = Mathf.Max(0, currentHealth - amount);
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        TryAnnounceLowHealth();
 
         AudioPlayer.Instance?.PlayCrystalDamage();
 
@@ -62,6 +72,16 @@ public class Crystal : MonoBehaviour
         flashRoutine = StartCoroutine(FlashRoutine());
 
         Debug.Log($"Crystal hit for {amount}. Health: {currentHealth}/{maxHealth}", this);
+        if (IsDestroyed) OnDestroyed?.Invoke();
+    }
+
+    void TryAnnounceLowHealth()
+    {
+        if (lowHealthAnnounced || maxHealth <= 0) return;
+        if ((float)currentHealth / maxHealth >= lowHealthThreshold) return;
+
+        lowHealthAnnounced = true;
+        OnLowHealth?.Invoke();
     }
 
     IEnumerator FlashRoutine()
