@@ -27,6 +27,8 @@ public class WaveDirector : MonoBehaviour
     int spawnedCount;
     bool running;
     bool gameOver;
+    int previousCrystalHealth = -1;
+    bool lowHealthMusicStarted;
 
     /// <summary>True once the crystal has fallen. The UI polls this.</summary>
     public bool IsGameOver => gameOver;
@@ -46,6 +48,8 @@ public class WaveDirector : MonoBehaviour
         running = true;
         
         AudioPlayer.Instance?.PlayBGM();
+        previousCrystalHealth = crystal != null ? crystal.CurrentHealth : -1;
+        lowHealthMusicStarted = false;
         
         nextSpawnTime = Time.time + firstSpawnDelay;
 
@@ -68,6 +72,19 @@ public class WaveDirector : MonoBehaviour
             EndGame();
             return;
         }
+
+        bool tookDamageThisFrame = previousCrystalHealth >= 0 && crystal.CurrentHealth < previousCrystalHealth;
+        if (tookDamageThisFrame)
+            ScreenShake.Instance?.Shake();
+
+        bool lowHealth = crystal.CurrentHealth * 4 < crystal.MaxHealth;
+        if (lowHealth && !lowHealthMusicStarted)
+        {
+            AudioPlayer.Instance?.PlayBGMLowHealth();
+            lowHealthMusicStarted = true;
+        }
+
+        previousCrystalHealth = crystal.CurrentHealth;
 
         if (Time.time < nextSpawnTime) return;
         nextSpawnTime = Time.time + spawnInterval;

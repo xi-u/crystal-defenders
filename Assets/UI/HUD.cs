@@ -25,6 +25,7 @@ public class HUD : MonoBehaviour
 
     Color baseColor;
     Coroutine flashRoutine;
+    int previousHealth = -1;
 
     void Awake()
     {
@@ -38,6 +39,18 @@ public class HUD : MonoBehaviour
         bool shouldShow = director != null && director.IsRunning;
         SetVisible(shouldShow);
         if (!shouldShow) return;
+
+        if (crystal == null || crystal.MaxHealth <= 0) return;
+
+        ShowCrystalHealth((float)crystal.CurrentHealth / crystal.MaxHealth);
+
+        bool lowHealth = crystal.CurrentHealth * 4 < crystal.MaxHealth;
+        SetLowHealth(lowHealth);
+
+        if (previousHealth >= 0 && crystal.CurrentHealth < previousHealth)
+            FlashBar();
+
+        previousHealth = crystal.CurrentHealth;
     }
 
     void SetVisible(bool visible)

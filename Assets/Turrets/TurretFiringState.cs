@@ -50,7 +50,11 @@ class TurretFiringState : TurretState
 
         // Fire at the target and update the next fire time.
         turret.FireOnce(_target.transform);
-        _nextFireTime = Time.time + turret.FireInterval;
+        float fireInterval = turret.FireInterval;
+        if (turret.IsCrystalLowHealth)
+            fireInterval *= 0.75f;
+
+        _nextFireTime = Time.time + fireInterval;
     }
 
     /// <summary>

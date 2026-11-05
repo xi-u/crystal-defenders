@@ -6,6 +6,9 @@ using UnityEngine;
 /// </summary>
 public class TurretBrain : TurretBody
 {
+    [Header("Sources")]
+    [SerializeField] Crystal crystal;
+
     [Tooltip("Seconds a reload takes.")]
     [SerializeField] float reloadTime = 1.5f;
 
@@ -31,4 +34,5 @@ public class TurretBrain : TurretBody
 
     public float ReloadTime => reloadTime;
     public float FireInterval => fireInterval;
+    public bool IsCrystalLowHealth => crystal != null && crystal.MaxHealth > 0 && crystal.CurrentHealth * 4 < crystal.MaxHealth;
 }
