@@ -25,7 +25,6 @@ public class Crystal : MonoBehaviour
 
     [Header("Feedback")]
     [Tooltip("Who makes the noise. The crystal has to be handed one and has to remember to call it.")]
-    [SerializeField] AudioPlayer audioPlayer;
     // URP's Lit shader stores tint in _BaseColor, not the old _Color.
     static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
@@ -57,7 +56,7 @@ public class Crystal : MonoBehaviour
 
         currentHealth = Mathf.Max(0, currentHealth - amount);
 
-        if (audioPlayer != null) audioPlayer.PlayCrystalDamage();
+        AudioPlayer.Instance?.PlayCrystalDamage();
 
         if (flashRoutine != null) StopCoroutine(flashRoutine);
         flashRoutine = StartCoroutine(FlashRoutine());

@@ -1320,6 +1320,7 @@ MonoBehaviour:
   _headRenderer: {fileID: 1349697794}
   _firingColor: {r: 1, g: 0, b: 0, a: 1}
   range: 14
+  audioPlayer: {fileID: 549878469}
   reloadTime: 1.5
   fireInterval: 0.4
 --- !u!1 &694883100
@@ -1812,6 +1813,7 @@ MonoBehaviour:
   firstSpawnDelay: 1
   spawnInterval: 1
   totalEnemies: 15
+  audioPlayer: {fileID: 549878469}
 --- !u!4 &999906231
 Transform:
   m_ObjectHideFlags: 0
@@ -2823,6 +2825,7 @@ MonoBehaviour:
   _headRenderer: {fileID: 1184820881}
   _firingColor: {r: 1, g: 0, b: 0, a: 1}
   range: 14
+  audioPlayer: {fileID: 549878469}
   reloadTime: 1.5
   fireInterval: 0.4
 --- !u!1 &1611956707

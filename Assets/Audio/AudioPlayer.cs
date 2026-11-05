@@ -42,7 +42,7 @@ public class AudioPlayer : MonoBehaviour
     AudioSource sfxSource;
     AudioSource musicSource;
 
-    public static AudioPlayer Instance;
+    public static AudioPlayer Instance { get; private set; }
 
     void InitializeSources()
     {
@@ -62,6 +62,14 @@ public class AudioPlayer : MonoBehaviour
     }
     void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        
+        Instance = this;
+        
         InitializeSources();
     }
 

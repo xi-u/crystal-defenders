@@ -64,11 +64,30 @@ A state machine would be too overkill for this.
 
 ## Part 3 — The Singleton pattern
 
-1. (Task 2, written before reading on) Why did the serialized-field wiring not work for the enemy? What other way could you think of?
+**1. (Task 2, written before reading on) Why did the serialized-field wiring not work for the enemy? What other way could you think of?**
 
-2. Which other classes in this project would be suitable for a singleton, and which would be a mistake? Why?
+Serialized field did not work because the enemy is a prefab and it is spawned at runtime. A prefab is not part of the scene
+so it can not reference a scene object. A method to make it work would be a use a singleton pattern, which makes
+the AudioPlayer accessible through its static instance property.
 
-3. What alternatives are there to the singleton for getting the `AudioPlayer` to a spawned enemy, and what is the trade-off?
+**2. Which other classes in this project would be suitable for a singleton, and which would be a mistake? Why?**
+
+The WaveDirector class would be suitable for a singleton because there is only one wave director in the scene.
+
+The Crystal class would be suitable for a singleton because there is only one crystal in the scene. And also a few
+other classes need to access the crystal, so it is suitable. 
+
+A singleton would be a mistake for the TurretBody class 
+for example because there are multiple turrets in the scene, and each turret has its own state. Other examples
+are Enemy, Projectile 
+
+**3. What alternatives are there to the singleton for getting the `AudioPlayer` to a spawned enemy, and what is the trade-off?**
+
+- Dependency injection: you can pass the AudioPlayer reference to the enemy when it is spawned. Trade
+off is that you have to modify the spawn code to pass the reference, which is extra work and is sensitive to mistakes.
+- event system: THe enemy can send an event when it is hit or dies, and the AudioPlayer can listen to those events. Trade
+off is that it is also extra work to set up the event system, and it is also sensitive to mistakes.
+- 
 
 ---
 

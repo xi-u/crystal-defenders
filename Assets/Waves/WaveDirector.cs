@@ -44,6 +44,9 @@ public class WaveDirector : MonoBehaviour
     {
         if (running || gameOver) return;
         running = true;
+        
+        AudioPlayer.Instance?.PlayBGM();
+        
         nextSpawnTime = Time.time + firstSpawnDelay;
 
         // Enemy.TotalKilled is static, so it lives in the C# domain and not in
@@ -84,6 +87,9 @@ public class WaveDirector : MonoBehaviour
     void EndGame()
     {
         gameOver = true;
+        AudioPlayer.Instance?.StopMusic();
+        AudioPlayer.Instance?.PlayGameOver();
+        
         // No spawns from here on. Enemies already in the field stop on their
         // own because they check the crystal before moving, so nothing needs
         // to hunt them down and switch them off.

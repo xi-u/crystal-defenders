@@ -90,10 +90,13 @@ public class Enemy : MonoBehaviour
         if (!IsAlive) return;
 
         currentHealth -= amount;
+        
+        AudioPlayer.Instance?.PlayEnemyHit();
 
         if (currentHealth <= 0)
         {
             TotalKilled++;
+            AudioPlayer.Instance?.PlayEnemyDied();
             Destroy(gameObject);
             return;
         }

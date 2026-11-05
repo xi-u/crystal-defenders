@@ -1,5 +1,6 @@
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// An autonomous defense turret. 
 ///
@@ -101,6 +102,8 @@ public class TurretBody : MonoBehaviour
         if (_projectilePrefab == null) return;   // already reported in Awake; never throw
 
         _ammo--;
+        
+        AudioPlayer.Instance?.PlayTurretShot();
 
         Vector3 aimDirection = target.position - _muzzle.position;
         Projectile round = Instantiate(_projectilePrefab, _muzzle.position, _head.rotation);
